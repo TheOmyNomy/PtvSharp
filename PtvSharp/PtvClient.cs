@@ -10,6 +10,7 @@ public class PtvClient
 	private const string BaseUrl = "https://timetableapi.ptv.vic.gov.au";
 
 	private const string VersionEndpoint = "/v3";
+	private const string RouteTypesEndpoint = VersionEndpoint + "/route_types";
 	private const string SearchEndpoint = VersionEndpoint + "/search/{0}";
 
 	private static readonly HttpClient Client = new()
@@ -26,12 +27,20 @@ public class PtvClient
 		_developerKey = developerKey;
 	}
 
-	public async Task<SearchResult?> GetSearchResultAsync(string term)
+	public async Task<RouteTypesResponse?> GetRouteTypesAsync()
+	{
+		string endpoint = ConstructEndpoint(RouteTypesEndpoint);
+		string url = ConstructUrl(endpoint);
+
+		return await GetAsync<RouteTypesResponse>(url);
+	}
+
+	public async Task<SearchResponse?> GetSearchAsync(string term)
 	{
 		string endpoint = ConstructEndpoint(SearchEndpoint, term);
 		string url = ConstructUrl(endpoint);
 
-		return await GetAsync<SearchResult>(url);
+		return await GetAsync<SearchResponse>(url);
 	}
 
 	private async Task<T?> GetAsync<T>(string url)
