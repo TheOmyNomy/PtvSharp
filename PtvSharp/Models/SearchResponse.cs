@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace PtvSharp.Models;
 
-public class SearchResponse
+public class SearchResponse : Response
 {
 	[JsonProperty("stops")]
 	public Stop[]? Stops { get; set; }
@@ -12,7 +12,4 @@ public class SearchResponse
 
 	[JsonProperty("outlets")]
 	public Outlet[]? Outlets { get; set; }
-
-	[JsonProperty("status")]
-	public Status? Status { get; set; }
 }

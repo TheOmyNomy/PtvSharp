@@ -43,9 +43,11 @@ public class PtvClient
 		return await GetAsync<SearchResponse>(url);
 	}
 
-	private async Task<T?> GetAsync<T>(string url)
+	private async Task<T?> GetAsync<T>(string url) where T : Response
 	{
-		string contents = await Client.GetStringAsync(url);
+		using HttpResponseMessage responseMessage = await Client.GetAsync(url);
+		string contents = await responseMessage.Content.ReadAsStringAsync();
+
 		return JsonConvert.DeserializeObject<T>(contents);
 	}
 

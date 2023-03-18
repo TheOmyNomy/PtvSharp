@@ -22,7 +22,7 @@ public class Stop
 	[JsonProperty("stop_longitude")]
 	public float? Longitude { get; set; }
 
-	[JsonProperty("sequence")]
+	[JsonProperty("stop_sequence")]
 	public int? Sequence { get; set; }
 
 	[JsonProperty("stop_id")]
