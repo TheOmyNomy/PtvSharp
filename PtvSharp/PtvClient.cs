@@ -35,10 +35,41 @@ public class PtvClient
 		return await GetAsync<RouteTypesResponse>(url);
 	}
 
-	public async Task<SearchResponse?> GetSearchAsync(string term)
+	public async Task<SearchResponse?> GetSearchAsync(string term, int[]? routeTypes = null, float? latitude = null, float? longitude = null, float? maxDistance = null,
+		bool? includeOutlets = null, bool? matchStopBySuburb = null, bool? matchRouteBySuburb = null, bool? matchStopByGtfsStopId = null)
 	{
 		string endpoint = ConstructEndpoint(SearchEndpoint, term);
-		string url = ConstructUrl(endpoint);
+
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (routeTypes != null)
+		{
+			foreach (int routeType in routeTypes)
+				parameters.Add(Parameter.Create("route_types", routeType));
+		}
+
+		if (latitude.HasValue)
+			parameters.Add(Parameter.Create("latitude", latitude.Value));
+
+		if (longitude.HasValue)
+			parameters.Add(Parameter.Create("longitude", longitude.Value));
+
+		if (maxDistance.HasValue)
+			parameters.Add(Parameter.Create("max_distance", maxDistance.Value));
+
+		if (includeOutlets.HasValue)
+			parameters.Add(Parameter.Create("include_outlets", includeOutlets.Value));
+
+		if (matchStopBySuburb.HasValue)
+			parameters.Add(Parameter.Create("match_stop_by_suburb", matchStopBySuburb.Value));
+
+		if (matchRouteBySuburb.HasValue)
+			parameters.Add(Parameter.Create("match_route_by_suburb", matchRouteBySuburb.Value));
+
+		if (matchStopByGtfsStopId.HasValue)
+			parameters.Add(Parameter.Create("match_stop_by_gtfs_stop_id", matchStopByGtfsStopId.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
 
 		return await GetAsync<SearchResponse>(url);
 	}
@@ -62,7 +93,7 @@ public class PtvClient
 		return string.Format(endpoint, arguments);
 	}
 
-	private string ConstructUrl(string endpoint, Dictionary<string, string>? parameters = null)
+	private string ConstructUrl(string endpoint, List<Parameter>? parameters = null)
 	{
 		StringBuilder urlBuilder = new StringBuilder(endpoint);
 		urlBuilder.Append("?devid=").Append(_developerId);
@@ -71,13 +102,10 @@ public class PtvClient
 		{
 			foreach (var parameter in parameters)
 			{
-				urlBuilder.Append("&").Append(parameter.Key).Append("=");
+				urlBuilder.Append("&").Append(parameter.Name).Append("=");
 
-				if (!string.IsNullOrWhiteSpace(parameter.Value))
-				{
-					string value = Uri.EscapeDataString(parameter.Value);
-					urlBuilder.Append(value);
-				}
+				string value = Uri.EscapeDataString(parameter.Value.ToString()!);
+				urlBuilder.Append(value);
 			}
 		}
 
