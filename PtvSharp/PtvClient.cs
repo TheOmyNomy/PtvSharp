@@ -10,7 +10,14 @@ public class PtvClient
 	private const string BaseUrl = "https://timetableapi.ptv.vic.gov.au";
 
 	private const string VersionEndpoint = "/v3";
+
 	private const string RouteTypesEndpoint = VersionEndpoint + "/route_types";
+
+	private const string RunsByRouteEndpoint = VersionEndpoint + "/runs/route/{0}";
+	private const string RunsByRouteByRouteTypeEndpoint = VersionEndpoint + "/runs/route/{0}/route_type/{1}";
+	private const string RunsEndpoint = VersionEndpoint + "/runs/{0}";
+	private const string RunsByRouteTypeEndpoint = VersionEndpoint + "/runs/{0}/route_type/{1}";
+
 	private const string SearchEndpoint = VersionEndpoint + "/search/{0}";
 
 	private static readonly HttpClient Client = new()
@@ -35,11 +42,88 @@ public class PtvClient
 		return await GetAsync<RouteTypesResponse>(url);
 	}
 
+	public async Task<RunsResponse?> GetRunsAsync(int routeId, string[]? expand = null, DateTime? dateUtc = null)
+	{
+		string endpoint = ConstructEndpoint(RunsByRouteEndpoint, routeId);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (expand != null)
+		{
+			foreach (string value in expand)
+				parameters.Add(Parameter.Create("expand", value));
+		}
+
+		if (dateUtc.HasValue)
+			parameters.Add(Parameter.Create("date_utc", dateUtc.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<RunsResponse>(url);
+	}
+
+	public async Task<RunsResponse?> GetRunsAsync(int routeId, int routeType, string[]? expand = null, DateTime? dateUtc = null)
+	{
+		string endpoint = ConstructEndpoint(RunsByRouteByRouteTypeEndpoint, routeId, routeType);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (expand != null)
+		{
+			foreach (string value in expand)
+				parameters.Add(Parameter.Create("expand", value));
+		}
+
+		if (dateUtc.HasValue)
+			parameters.Add(Parameter.Create("date_utc", dateUtc.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<RunsResponse>(url);
+	}
+
+	public async Task<RunsResponse?> GetRunsAsync(string runRef, string[]? expand = null, DateTime? dateUtc = null, bool? includeGeopath = null)
+	{
+		string endpoint = ConstructEndpoint(RunsEndpoint, runRef);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (expand != null)
+		{
+			foreach (string value in expand)
+				parameters.Add(Parameter.Create("expand", value));
+		}
+
+		if (dateUtc.HasValue)
+			parameters.Add(Parameter.Create("date_utc", dateUtc.Value));
+
+		if (includeGeopath.HasValue)
+			parameters.Add(Parameter.Create("include_geopath", includeGeopath.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<RunsResponse>(url);
+	}
+
+	public async Task<RunResponse?> GetRunAsync(string runRef, int routeType, string[]? expand = null, DateTime? dateUtc = null, bool? includeGeopath = null)
+	{
+		string endpoint = ConstructEndpoint(RunsByRouteTypeEndpoint, runRef, routeType);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (expand != null)
+		{
+			foreach (string value in expand)
+				parameters.Add(Parameter.Create("expand", value));
+		}
+
+		if (dateUtc.HasValue)
+			parameters.Add(Parameter.Create("date_utc", dateUtc.Value));
+
+		if (includeGeopath.HasValue)
+			parameters.Add(Parameter.Create("include_geopath", includeGeopath.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<RunResponse>(url);
+	}
+
 	public async Task<SearchResponse?> GetSearchAsync(string term, int[]? routeTypes = null, float? latitude = null, float? longitude = null, float? maxDistance = null,
 		bool? includeOutlets = null, bool? matchStopBySuburb = null, bool? matchRouteBySuburb = null, bool? matchStopByGtfsStopId = null)
 	{
 		string endpoint = ConstructEndpoint(SearchEndpoint, term);
-
 		List<Parameter> parameters = new List<Parameter>();
 
 		if (routeTypes != null)
@@ -70,7 +154,6 @@ public class PtvClient
 			parameters.Add(Parameter.Create("match_stop_by_gtfs_stop_id", matchStopByGtfsStopId.Value));
 
 		string url = ConstructUrl(endpoint, parameters);
-
 		return await GetAsync<SearchResponse>(url);
 	}
 
