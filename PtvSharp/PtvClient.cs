@@ -13,6 +13,9 @@ public class PtvClient
 
 	private const string RouteTypesEndpoint = VersionEndpoint + "/route_types";
 
+	private const string RoutesEndpoint = VersionEndpoint + "/routes";
+	private const string RoutesByRouteIdEndpoint = VersionEndpoint + "/routes/{0}";
+
 	private const string RunsByRouteEndpoint = VersionEndpoint + "/runs/route/{0}";
 	private const string RunsByRouteByRouteTypeEndpoint = VersionEndpoint + "/runs/route/{0}/route_type/{1}";
 	private const string RunsEndpoint = VersionEndpoint + "/runs/{0}";
@@ -40,6 +43,39 @@ public class PtvClient
 		string url = ConstructUrl(endpoint);
 
 		return await GetAsync<RouteTypesResponse>(url);
+	}
+
+	public async Task<RoutesResponse?> GetRoutesAsync(int[]? routeTypes = null, string? routeName = null)
+	{
+		string endpoint = ConstructEndpoint(RoutesEndpoint);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (routeTypes != null)
+		{
+			foreach (int routeType in routeTypes)
+				parameters.Add(Parameter.Create("route_types", routeType));
+		}
+
+		if (!string.IsNullOrWhiteSpace(routeName))
+			parameters.Add(Parameter.Create("route_name", routeName));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<RoutesResponse>(url);
+	}
+
+	public async Task<RouteResponse?> GetRouteAsync(int routeId, bool? includeGeopath = null, DateTime? geopathUtc = null)
+	{
+		string endpoint = ConstructEndpoint(RoutesByRouteIdEndpoint, routeId);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (includeGeopath.HasValue)
+			parameters.Add(Parameter.Create("include_geopath", includeGeopath.Value));
+
+		if (geopathUtc.HasValue)
+			parameters.Add(Parameter.Create("geopath_utc", geopathUtc.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<RouteResponse>(url);
 	}
 
 	public async Task<RunsResponse?> GetRunsAsync(int routeId, string[]? expand = null, DateTime? dateUtc = null)
