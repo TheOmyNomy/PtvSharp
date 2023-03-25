@@ -11,6 +11,9 @@ public class PtvClient
 
 	private const string VersionEndpoint = "/v3";
 
+	private const string OutletsEndpoint = VersionEndpoint + "/outlets";
+	private const string OutletsByLocationEndpoint = VersionEndpoint + "/outlets/location/{0},{1}";
+
 	private const string RouteTypesEndpoint = VersionEndpoint + "/route_types";
 
 	private const string RoutesEndpoint = VersionEndpoint + "/routes";
@@ -35,6 +38,33 @@ public class PtvClient
 	{
 		_developerId = developerId;
 		_developerKey = developerKey;
+	}
+
+	public async Task<OutletsResponse?> GetOutletsAsync(int? maxResults = null)
+	{
+		string endpoint = ConstructEndpoint(OutletsEndpoint);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (maxResults.HasValue)
+			parameters.Add(Parameter.Create("max_results", maxResults.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<OutletsResponse>(url);
+	}
+
+	public async Task<OutletsResponse?> GetOutletsAsync(float latitude, float longitude, double? maxDistance = null, int? maxResults = null)
+	{
+		string endpoint = ConstructEndpoint(OutletsByLocationEndpoint, latitude, longitude);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (maxDistance.HasValue)
+			parameters.Add(Parameter.Create("max_distance", maxDistance.Value));
+
+		if (maxResults.HasValue)
+			parameters.Add(Parameter.Create("max_results", maxResults.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<OutletsResponse>(url);
 	}
 
 	public async Task<RouteTypesResponse?> GetRouteTypesAsync()
