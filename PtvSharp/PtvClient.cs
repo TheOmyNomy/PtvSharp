@@ -17,7 +17,7 @@ public class PtvClient
 	private const string RouteTypesEndpoint = VersionEndpoint + "/route_types";
 
 	private const string RoutesEndpoint = VersionEndpoint + "/routes";
-	private const string RoutesByRouteIdEndpoint = VersionEndpoint + "/routes/{0}";
+	private const string RoutesByRouteEndpoint = VersionEndpoint + "/routes/{0}";
 
 	private const string RunsByRouteEndpoint = VersionEndpoint + "/runs/route/{0}";
 	private const string RunsByRouteByRouteTypeEndpoint = VersionEndpoint + "/runs/route/{0}/route_type/{1}";
@@ -25,6 +25,13 @@ public class PtvClient
 	private const string RunsByRouteTypeEndpoint = VersionEndpoint + "/runs/{0}/route_type/{1}";
 
 	private const string SearchEndpoint = VersionEndpoint + "/search/{0}";
+
+	private const string DisruptionsEndpoint = VersionEndpoint + "/disruptions";
+	private const string DisruptionsByRouteEndpoint = VersionEndpoint + "/disruptions/route/{0}";
+	private const string DisruptionsByRouteByStopEndpoint = VersionEndpoint + "/disruptions/route/{0}/stop/{1}";
+	private const string DisruptionsByStopEndpoint = VersionEndpoint + "/disruptions/stop/{0}";
+	private const string DisruptionsByDisruptionEndpoint = VersionEndpoint + "/disruptions/{0}";
+	private const string DisruptionsModesEndpoint = VersionEndpoint + "/disruptions/modes";
 
 	private static readonly HttpClient Client = new()
 	{
@@ -38,6 +45,82 @@ public class PtvClient
 	{
 		_developerId = developerId;
 		_developerKey = developerKey;
+	}
+
+	public async Task<DisruptionsResponse?> GetDisruptionsAsync(int[]? routeTypes = null, int[]? disruptionModes = null, string? disruptionStatus = null)
+	{
+		string endpoint = ConstructEndpoint(DisruptionsEndpoint);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (routeTypes != null)
+		{
+			foreach (int routeType in routeTypes)
+				parameters.Add(Parameter.Create("route_types", routeType));
+		}
+
+		if (disruptionModes != null)
+		{
+			foreach (int disruptionMode in disruptionModes)
+				parameters.Add(Parameter.Create("disruption_modes", disruptionMode));
+		}
+
+		if (!string.IsNullOrWhiteSpace(disruptionStatus))
+			parameters.Add(Parameter.Create("disruption_status", disruptionStatus));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<DisruptionsResponse>(url);
+	}
+
+	public async Task<DisruptionsResponse?> GetDisruptionsByRouteAsync(int routeId, string? disruptionStatus = null)
+	{
+		string endpoint = ConstructEndpoint(DisruptionsByRouteEndpoint, routeId);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (!string.IsNullOrWhiteSpace(disruptionStatus))
+			parameters.Add(Parameter.Create("disruption_status", disruptionStatus));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<DisruptionsResponse>(url);
+	}
+
+	public async Task<DisruptionsResponse?> GetDisruptionsAsync(int routeId, int stopId, string? disruptionStatus = null)
+	{
+		string endpoint = ConstructEndpoint(DisruptionsByRouteByStopEndpoint, routeId, stopId);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (!string.IsNullOrWhiteSpace(disruptionStatus))
+			parameters.Add(Parameter.Create("disruption_status", disruptionStatus));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<DisruptionsResponse>(url);
+	}
+
+	public async Task<DisruptionsResponse?> GetDisruptionsByStopAsync(int stopId, string? disruptionStatus = null)
+	{
+		string endpoint = ConstructEndpoint(DisruptionsByStopEndpoint, stopId);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (!string.IsNullOrWhiteSpace(disruptionStatus))
+			parameters.Add(Parameter.Create("disruption_status", disruptionStatus));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<DisruptionsResponse>(url);
+	}
+
+	public async Task<DisruptionResponse?> GetDisruptionAsync(int disruptionId)
+	{
+		string endpoint = ConstructEndpoint(DisruptionsByDisruptionEndpoint, disruptionId);
+
+		string url = ConstructUrl(endpoint);
+		return await GetAsync<DisruptionResponse>(url);
+	}
+
+	public async Task<DisruptionModesResponse?> GetDisruptionModesAsync()
+	{
+		string endpoint = ConstructEndpoint(DisruptionsModesEndpoint);
+
+		string url = ConstructUrl(endpoint);
+		return await GetAsync<DisruptionModesResponse>(url);
 	}
 
 	public async Task<OutletsResponse?> GetOutletsAsync(int? maxResults = null)
@@ -95,7 +178,7 @@ public class PtvClient
 
 	public async Task<RouteResponse?> GetRouteAsync(int routeId, bool? includeGeopath = null, DateTime? geopathUtc = null)
 	{
-		string endpoint = ConstructEndpoint(RoutesByRouteIdEndpoint, routeId);
+		string endpoint = ConstructEndpoint(RoutesByRouteEndpoint, routeId);
 		List<Parameter> parameters = new List<Parameter>();
 
 		if (includeGeopath.HasValue)
