@@ -11,20 +11,9 @@ public class PtvClient
 
 	private const string VersionEndpoint = "/v3";
 
-	private const string OutletsEndpoint = VersionEndpoint + "/outlets";
-	private const string OutletsByLocationEndpoint = VersionEndpoint + "/outlets/location/{0},{1}";
-
-	private const string RouteTypesEndpoint = VersionEndpoint + "/route_types";
-
-	private const string RoutesEndpoint = VersionEndpoint + "/routes";
-	private const string RoutesByRouteEndpoint = VersionEndpoint + "/routes/{0}";
-
-	private const string RunsByRouteEndpoint = VersionEndpoint + "/runs/route/{0}";
-	private const string RunsByRouteByRouteTypeEndpoint = VersionEndpoint + "/runs/route/{0}/route_type/{1}";
-	private const string RunsEndpoint = VersionEndpoint + "/runs/{0}";
-	private const string RunsByRouteTypeEndpoint = VersionEndpoint + "/runs/{0}/route_type/{1}";
-
-	private const string SearchEndpoint = VersionEndpoint + "/search/{0}";
+	private const string DirectionsByRouteEndpoint = VersionEndpoint + "/directions/route/{0}";
+	private const string DirectionsByDirectionEndpoint = VersionEndpoint + "/directions/{0}";
+	private const string DirectionsByDirectionByRouteTypeEndpoint = VersionEndpoint + "/directions/{0}/route_type/{1}";
 
 	private const string DisruptionsEndpoint = VersionEndpoint + "/disruptions";
 	private const string DisruptionsByRouteEndpoint = VersionEndpoint + "/disruptions/route/{0}";
@@ -32,6 +21,21 @@ public class PtvClient
 	private const string DisruptionsByStopEndpoint = VersionEndpoint + "/disruptions/stop/{0}";
 	private const string DisruptionsByDisruptionEndpoint = VersionEndpoint + "/disruptions/{0}";
 	private const string DisruptionsModesEndpoint = VersionEndpoint + "/disruptions/modes";
+
+	private const string OutletsEndpoint = VersionEndpoint + "/outlets";
+	private const string OutletsByLocationEndpoint = VersionEndpoint + "/outlets/location/{0},{1}";
+
+	private const string RoutesEndpoint = VersionEndpoint + "/routes";
+	private const string RoutesByRouteEndpoint = VersionEndpoint + "/routes/{0}";
+
+	private const string RouteTypesEndpoint = VersionEndpoint + "/route_types";
+
+	private const string RunsByRouteEndpoint = VersionEndpoint + "/runs/route/{0}";
+	private const string RunsByRouteByRouteTypeEndpoint = VersionEndpoint + "/runs/route/{0}/route_type/{1}";
+	private const string RunsEndpoint = VersionEndpoint + "/runs/{0}";
+	private const string RunsByRouteTypeEndpoint = VersionEndpoint + "/runs/{0}/route_type/{1}";
+
+	private const string SearchEndpoint = VersionEndpoint + "/search/{0}";
 
 	private static readonly HttpClient Client = new()
 	{
@@ -45,6 +49,30 @@ public class PtvClient
 	{
 		_developerId = developerId;
 		_developerKey = developerKey;
+	}
+
+	public async Task<DirectionsResponse?> GetDirectionsByRouteAsync(int routeId)
+	{
+		string endpoint = ConstructEndpoint(DirectionsByRouteEndpoint, routeId);
+
+		string url = ConstructUrl(endpoint);
+		return await GetAsync<DirectionsResponse>(url);
+	}
+
+	public async Task<DirectionsResponse?> GetDirectionsByDirectionAsync(int directionId)
+	{
+		string endpoint = ConstructEndpoint(DirectionsByDirectionEndpoint, directionId);
+
+		string url = ConstructUrl(endpoint);
+		return await GetAsync<DirectionsResponse>(url);
+	}
+
+	public async Task<DirectionsResponse?> GetDirectionsAsync(int directionId, int routeType)
+	{
+		string endpoint = ConstructEndpoint(DirectionsByDirectionByRouteTypeEndpoint, directionId, routeType);
+
+		string url = ConstructUrl(endpoint);
+		return await GetAsync<DirectionsResponse>(url);
 	}
 
 	public async Task<DisruptionsResponse?> GetDisruptionsAsync(int[]? routeTypes = null, int[]? disruptionModes = null, string? disruptionStatus = null)
@@ -150,14 +178,6 @@ public class PtvClient
 		return await GetAsync<OutletsResponse>(url);
 	}
 
-	public async Task<RouteTypesResponse?> GetRouteTypesAsync()
-	{
-		string endpoint = ConstructEndpoint(RouteTypesEndpoint);
-		string url = ConstructUrl(endpoint);
-
-		return await GetAsync<RouteTypesResponse>(url);
-	}
-
 	public async Task<RoutesResponse?> GetRoutesAsync(int[]? routeTypes = null, string? routeName = null)
 	{
 		string endpoint = ConstructEndpoint(RoutesEndpoint);
@@ -189,6 +209,14 @@ public class PtvClient
 
 		string url = ConstructUrl(endpoint, parameters);
 		return await GetAsync<RouteResponse>(url);
+	}
+
+	public async Task<RouteTypesResponse?> GetRouteTypesAsync()
+	{
+		string endpoint = ConstructEndpoint(RouteTypesEndpoint);
+		string url = ConstructUrl(endpoint);
+
+		return await GetAsync<RouteTypesResponse>(url);
 	}
 
 	public async Task<RunsResponse?> GetRunsAsync(int routeId, string[]? expand = null, DateTime? dateUtc = null)
