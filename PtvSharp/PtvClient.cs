@@ -11,6 +11,9 @@ public class PtvClient
 
 	private const string VersionEndpoint = "/v3";
 
+	private const string DeparturesByRouteTypeByStopEndpoint = VersionEndpoint + "/departures/route_type/{0}/stop/{1}";
+	private const string DeparturesByRouteTypeByStopByRouteEndpoint = VersionEndpoint + "/departures/route_type/{0}/stop/{1}/route/{2}";
+
 	private const string DirectionsByRouteEndpoint = VersionEndpoint + "/directions/route/{0}";
 	private const string DirectionsByDirectionEndpoint = VersionEndpoint + "/directions/{0}";
 	private const string DirectionsByDirectionByRouteTypeEndpoint = VersionEndpoint + "/directions/{0}/route_type/{1}";
@@ -49,6 +52,86 @@ public class PtvClient
 	{
 		_developerId = developerId;
 		_developerKey = developerKey;
+	}
+
+	public async Task<DeparturesResponse?> GetDeparturesAsync(int routeType, int stopId, int[]? platformNumbers = null, int? directionId = null, bool? gtfs = null,
+		string? dateUtc = null, int? maxResults = null, bool? includeCancelled = null, bool? lookBackwards = null, string[]? expand = null, bool? includeGeopath = null)
+	{
+		string endpoint = ConstructEndpoint(DeparturesByRouteTypeByStopEndpoint, routeType, stopId);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (platformNumbers != null)
+		{
+			foreach (int platformNumber in platformNumbers)
+				parameters.Add(Parameter.Create("platform_numbers", platformNumber));
+		}
+
+		if (directionId.HasValue)
+			parameters.Add(Parameter.Create("direction_id", directionId.Value));
+
+		if (gtfs.HasValue)
+			parameters.Add(Parameter.Create("gtfs", gtfs.Value));
+
+		if (!string.IsNullOrWhiteSpace(dateUtc))
+			parameters.Add(Parameter.Create("date_utc", dateUtc));
+
+		if (maxResults.HasValue)
+			parameters.Add(Parameter.Create("max_results", maxResults.Value));
+
+		if (includeCancelled.HasValue)
+			parameters.Add(Parameter.Create("include_cancelled", includeCancelled.Value));
+
+		if (lookBackwards.HasValue)
+			parameters.Add(Parameter.Create("look_backwards", lookBackwards.Value));
+
+		if (expand != null)
+		{
+			foreach (string expandValue in expand)
+				parameters.Add(Parameter.Create("expand", expandValue));
+		}
+
+		if (includeGeopath.HasValue)
+			parameters.Add(Parameter.Create("include_geopath", includeGeopath.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<DeparturesResponse>(url);
+	}
+
+	public async Task<DeparturesResponse?> GetDeparturesAsync(int routeType, int stopId, int routeId, int? directionId = null, bool? gtfs = null, string? dateUtc = null,
+		int? maxResults = null, bool? includeCancelled = null, bool? lookBackwards = null, string[]? expand = null, bool? includeGeopath = null)
+	{
+		string endpoint = ConstructEndpoint(DeparturesByRouteTypeByStopByRouteEndpoint, routeType, stopId, routeId);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (directionId.HasValue)
+			parameters.Add(Parameter.Create("direction_id", directionId.Value));
+
+		if (gtfs.HasValue)
+			parameters.Add(Parameter.Create("gtfs", gtfs.Value));
+
+		if (!string.IsNullOrWhiteSpace(dateUtc))
+			parameters.Add(Parameter.Create("date_utc", dateUtc));
+
+		if (maxResults.HasValue)
+			parameters.Add(Parameter.Create("max_results", maxResults.Value));
+
+		if (includeCancelled.HasValue)
+			parameters.Add(Parameter.Create("include_cancelled", includeCancelled.Value));
+
+		if (lookBackwards.HasValue)
+			parameters.Add(Parameter.Create("look_backwards", lookBackwards.Value));
+
+		if (expand != null)
+		{
+			foreach (string expandValue in expand)
+				parameters.Add(Parameter.Create("expand", expandValue));
+		}
+
+		if (includeGeopath.HasValue)
+			parameters.Add(Parameter.Create("include_geopath", includeGeopath.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<DeparturesResponse>(url);
 	}
 
 	public async Task<DirectionsResponse?> GetDirectionsByRouteAsync(int routeId)
