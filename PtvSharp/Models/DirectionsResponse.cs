@@ -5,5 +5,5 @@ namespace PtvSharp.Models;
 public class DirectionsResponse : Response
 {
 	[JsonProperty("directions")]
-	public DirectionWithDescription[]? Directions { get; set; }
+	public Direction[]? Directions { get; set; }
 }

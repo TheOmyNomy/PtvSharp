@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace PtvSharp.Models;
 
-public class DirectionWithDescription
+public class Direction
 {
 	[JsonProperty("route_direction_description")]
 	public string? RouteDirectionDescription { get; set; }

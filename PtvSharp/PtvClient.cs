@@ -28,6 +28,8 @@ public class PtvClient
 	private const string OutletsEndpoint = VersionEndpoint + "/outlets";
 	private const string OutletsByLocationEndpoint = VersionEndpoint + "/outlets/location/{0},{1}";
 
+	private const string PatternByRunRefByRouteTypeEndpoint = VersionEndpoint + "/pattern/run/{0}/route_type/{1}";
+
 	private const string RoutesEndpoint = VersionEndpoint + "/routes";
 	private const string RoutesByRouteEndpoint = VersionEndpoint + "/routes/{0}";
 
@@ -259,6 +261,47 @@ public class PtvClient
 
 		string url = ConstructUrl(endpoint, parameters);
 		return await GetAsync<OutletsResponse>(url);
+	}
+
+	public async Task<PatternResponse?> GetPatternAsync(string runRef, int routeType, string[]? expand = null, int? stopId = null, string? dateUtc = null,
+		bool? includeSkippedStops = null, bool? includeGeopath = null)
+	{
+		string endpoint = ConstructEndpoint(PatternByRunRefByRouteTypeEndpoint, runRef, routeType);
+		List<Parameter> parameters = new List<Parameter>();
+
+		const string vehiclePosition = "VehiclePosition", vehicleDescriptor = "VehicleDescriptor";
+
+		if (expand != null)
+		{
+			foreach (string expandValue in expand)
+				parameters.Add(Parameter.Create("expand", expandValue));
+
+			if (!expand.Contains(vehiclePosition))
+				parameters.Add(Parameter.Create("expand", vehiclePosition));
+
+			if (!expand.Contains(vehicleDescriptor))
+				parameters.Add(Parameter.Create("expand", vehicleDescriptor));
+		}
+		else
+		{
+			parameters.Add(Parameter.Create("expand", vehiclePosition));
+			parameters.Add(Parameter.Create("expand", vehicleDescriptor));
+		}
+
+		if (stopId.HasValue)
+			parameters.Add(Parameter.Create("stop_id", stopId.Value));
+
+		if (!string.IsNullOrWhiteSpace(dateUtc))
+			parameters.Add(Parameter.Create("date_utc", dateUtc));
+
+		if (includeSkippedStops.HasValue)
+			parameters.Add(Parameter.Create("include_skipped_stops", includeSkippedStops.Value));
+
+		if (includeGeopath.HasValue)
+			parameters.Add(Parameter.Create("include_geopath", includeGeopath.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<PatternResponse>(url);
 	}
 
 	public async Task<RoutesResponse?> GetRoutesAsync(int[]? routeTypes = null, string? routeName = null)
