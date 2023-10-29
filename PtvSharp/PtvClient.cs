@@ -42,6 +42,10 @@ public class PtvClient
 
 	private const string SearchEndpoint = VersionEndpoint + "/search/{0}";
 
+	private const string StopByStopByRouteTypeEndpoint = VersionEndpoint + "/stops/{0}/route_type/{1}";
+	private const string StopByRouteByRouteTypeEndpoint = VersionEndpoint + "/stops/route/{0}/route_type/{1}";
+	private const string StopByLocationEndpoint = VersionEndpoint + "/stops/location/{0},{1}";
+
 	private static readonly HttpClient Client = new()
 	{
 		BaseAddress = new Uri(BaseUrl)
@@ -458,6 +462,87 @@ public class PtvClient
 
 		string url = ConstructUrl(endpoint, parameters);
 		return await GetAsync<SearchResponse>(url);
+	}
+
+	public async Task<StopResponse?> GetStopAsync(int stopId, int routeType, bool? stopLocation = null, bool? stopAmenities = null, bool? stopAccessibility = null,
+		bool? stopContact = null, bool? stopTicket = null, bool? gtfs = null, bool? stopStaffing = null, bool? stopDisruptions = null)
+	{
+		string endpoint = ConstructEndpoint(StopByStopByRouteTypeEndpoint, stopId, routeType);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (stopLocation.HasValue)
+			parameters.Add(Parameter.Create("stop_location", stopLocation.Value));
+
+		if (stopAmenities.HasValue)
+			parameters.Add(Parameter.Create("stop_amenities", stopAmenities.Value));
+
+		if (stopAccessibility.HasValue)
+			parameters.Add(Parameter.Create("stop_accessibility", stopAccessibility.Value));
+
+		if (stopContact.HasValue)
+			parameters.Add(Parameter.Create("stop_contact", stopContact.Value));
+
+		if (stopTicket.HasValue)
+			parameters.Add(Parameter.Create("stop_ticket", stopTicket.Value));
+
+		if (gtfs.HasValue)
+			parameters.Add(Parameter.Create("gtfs", gtfs.Value));
+
+		if (stopStaffing.HasValue)
+			parameters.Add(Parameter.Create("stop_staffing", stopStaffing.Value));
+
+		if (stopDisruptions.HasValue)
+			parameters.Add(Parameter.Create("stop_disruptions", stopDisruptions.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<StopResponse>(url);
+	}
+
+	public async Task<StopsOnRouteResponse?> GetStopAsync(int routeId, int routeType, int? directionId = null, bool? stopDisruptions = null, bool? includeGeopath = null,
+		DateTime? geopathUtc = null)
+	{
+		string endpoint = ConstructEndpoint(StopByRouteByRouteTypeEndpoint, routeId, routeType);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (directionId.HasValue)
+			parameters.Add(Parameter.Create("direction_id", directionId.Value));
+
+		if (stopDisruptions.HasValue)
+			parameters.Add(Parameter.Create("stop_disruptions", stopDisruptions.Value));
+
+		if (includeGeopath.HasValue)
+			parameters.Add(Parameter.Create("include_geopath", includeGeopath.Value));
+
+		if (geopathUtc.HasValue)
+			parameters.Add(Parameter.Create("geopath_utc", geopathUtc.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<StopsOnRouteResponse>(url);
+	}
+
+	public async Task<StopsByDistanceResponse?> GetStopAsync(float latitude, float longitude, int[]? routeTypes = null, int? maxResults = null, double? maxDistance = null,
+		bool? stopDisruptions = null)
+	{
+		string endpoint = ConstructEndpoint(StopByLocationEndpoint, latitude, longitude);
+		List<Parameter> parameters = new List<Parameter>();
+
+		if (routeTypes != null)
+		{
+			foreach (int routeType in routeTypes)
+				parameters.Add(Parameter.Create("route_types", routeType));
+		}
+
+		if (maxResults.HasValue)
+			parameters.Add(Parameter.Create("max_results", maxResults.Value));
+
+		if (maxDistance.HasValue)
+			parameters.Add(Parameter.Create("max_distance", maxDistance.Value));
+
+		if (stopDisruptions.HasValue)
+			parameters.Add(Parameter.Create("stop_disruptions", stopDisruptions.Value));
+
+		string url = ConstructUrl(endpoint, parameters);
+		return await GetAsync<StopsByDistanceResponse>(url);
 	}
 
 	private async Task<T?> GetAsync<T>(string url) where T : Response
