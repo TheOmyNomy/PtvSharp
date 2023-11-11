@@ -13,6 +13,6 @@ public class StopAmenityDetails
 	[JsonProperty("car_parking")]
 	public string? CarParking { get; set; }
 
-	[JsonProperty("cctb")]
+	[JsonProperty("cctv")]
 	public bool? Cctv { get; set; }
 }

@@ -5,8 +5,8 @@ namespace PtvSharp.Models;
 public class StopGps
 {
 	[JsonProperty("latitude")]
-	public float Latitude { get; set; }
+	public float? Latitude { get; set; }
 
 	[JsonProperty("longitude")]
-	public float Longitude { get; set; }
+	public float? Longitude { get; set; }
 }
